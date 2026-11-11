@@ -1,16 +1,19 @@
+"use client";
+
 import Image from "next/image";
 import { ArrowRight, Calculator, BadgeCheck, ShieldCheck, Award, BadgePercent } from "lucide-react";
 import heroHome from "@/assets/images/hero-home.webp";
-import { HERO } from "@/lib/site-data";
+import { useT } from "@/lib/lang-store";
 
 const chipIcons = [ShieldCheck, BadgeCheck, BadgePercent, Award];
 
 export default function Hero() {
+  const { t } = useT();
   return (
     <section id="top" aria-labelledby="hero-title" className="relative isolate">
       <Image
         src={heroHome}
-        alt="Modern residential home built by Amozecks Projects"
+        alt={t.hero.imgAlt}
         fill
         priority
         sizes="100vw"
@@ -22,30 +25,30 @@ export default function Hero() {
       <div className="wrap flex min-h-[88svh] flex-col justify-center py-24 sm:py-28">
         <div className="max-w-2xl">
           <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white backdrop-blur">
-            {HERO.kicker}
+            {t.hero.kicker}
           </p>
           <h1
             id="hero-title"
             className="mt-6 font-heading text-4xl font-extrabold leading-[1.08] text-white sm:text-5xl lg:text-6xl"
           >
-            Do It <span className="text-brand-400">Right</span>
+            {t.hero.titlePre} <span className="text-brand-400">{t.hero.titleHighlight}</span>
             <br />
-            The First Time
+            {t.hero.titlePost}
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-200">{HERO.text}</p>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-200">{t.hero.text}</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <a href="#calculator" className="btn-primary text-base sm:min-h-12">
               <Calculator className="size-5" aria-hidden />
-              Get an Instant Estimate
+              {t.hero.ctaCalc}
             </a>
             <a href="#services" className="btn-outline-dark text-base sm:min-h-12">
-              Explore Our Services
+              {t.hero.ctaServices}
               <ArrowRight className="size-5" aria-hidden />
             </a>
           </div>
 
-          <ul className="mt-12 flex flex-wrap gap-2.5" aria-label="Trust badges">
-            {HERO.trustChips.map((chip, i) => {
+          <ul className="mt-12 flex flex-wrap gap-2.5" aria-label={t.hero.trustLabel}>
+            {t.hero.trustChips.map((chip, i) => {
               const Icon = chipIcons[i % chipIcons.length];
               return (
                 <li

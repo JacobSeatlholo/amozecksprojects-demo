@@ -37,6 +37,17 @@ A quote calculator (`#calculator`) built for how South African customers actuall
 - Rates are **indicative market ranges for planning only** — clearly labelled in the UI. To tune them for the business, edit the single `RATE_TABLE` in [`src/lib/quote.ts`](src/lib/quote.ts).
 - A floating WhatsApp button is always one tap away.
 
+## Multilingual: English · isiZulu · Afrikaans
+
+The whole site — including the calculator and every WhatsApp message — switches instantly between the three languages most relevant to the company’s KwaZulu-Natal and Gauteng customers:
+
+- **EN / ZU / AF switcher** in the header (desktop) and in the mobile menu; the choice is remembered (`localStorage`).
+- `<html lang>` and the document title update per language (`en-ZA`, `zu-ZA`, `af-ZA`).
+- WhatsApp deep links (floating button, careers, contact and the calculator’s structured estimate message) are fully translated per language.
+- Facts stay facts: phone numbers, addresses, NHBRC/BBBEE claims and rates are identical in every language; only prose is translated.
+- Architecture: display strings live in the three dictionaries in [`src/lib/i18n.ts`](src/lib/i18n.ts) (typed `Dict` — TypeScript guarantees all three languages stay complete); `src/lib/lang-store.ts` holds the zustand store; `lang-sync.tsx` applies the persisted choice after mount (hydration-safe). Numbers stay in `quote.ts`, facts in `site-data.ts`.
+- The isiZulu copy is written as natural, professional urban-industrial isiZulu (standard SA loanword forms for technical terms). Have a native speaker proof-read before production use.
+
 ## Quick start
 
 ```bash
@@ -51,7 +62,7 @@ npm run lint
 ```
 src/
 ├── app/
-│   ├── layout.tsx        # fonts, metadata, header/footer, skip link
+│   ├── layout.tsx        # fonts, metadata, header/footer, language sync
 │   ├── page.tsx          # one-page composition + JSON-LD
 │   ├── robots.ts         # /robots.txt
 │   ├── sitemap.ts        # /sitemap.xml
@@ -60,12 +71,14 @@ src/
 ├── assets/
 │   ├── images/           # real photos/logos, optimised to WebP
 │   └── fonts/            # self-hosted Poppins + Roboto (latin)
-├── components/site/      # hero, about, services, gallery, calculator, contact…
+├── components/site/      # hero, about, services, gallery, calculator, contact… + lang-sync
 ├── components/ui/        # shadcn/ui toast (the only primitives used)
 ├── hooks/use-toast.ts
 └── lib/
-    ├── site-data.ts      # ALL real content in one place
-    ├── quote.ts          # estimate engine + RATE_TABLE + WhatsApp message builder
+    ├── site-data.ts      # REAL facts only (contacts, addresses, nav, rates metadata)
+    ├── i18n.ts           # EN/ZU/AF dictionaries — all display strings, typed Dict
+    ├── lang-store.ts     # zustand language store + localStorage persistence
+    ├── quote.ts          # estimate engine + RATE_TABLE + localized WhatsApp messages
     └── quote-store.ts    # zustand store for service preselection
 public/
 ├── llms.txt              # LLM/agent-readable business summary
@@ -74,9 +87,10 @@ public/
 
 ## Customising
 
-- **Text, contacts, services, gallery** → [`src/lib/site-data.ts`](src/lib/site-data.ts)
-- **Estimate rates, presets, areas** → `RATE_TABLE` in [`src/lib/quote.ts`](src/lib/quote.ts)
-- **WhatsApp number & greeting** → `COMPANY` in `site-data.ts` (currently the live site’s 082 291 6151 / +27 82 291 6151)
+- **Translations & all display text** → [`src/lib/i18n.ts`](src/lib/i18n.ts) (add a language by adding a fourth dictionary + entry in `LANGS`/`LANG_META` — TypeScript will force you to complete it)
+- **Facts: contacts, addresses, nav anchors** → [`src/lib/site-data.ts`](src/lib/site-data.ts)
+- **Estimate rates, presets** → `RATE_TABLE` in [`src/lib/quote.ts`](src/lib/quote.ts)
+- **WhatsApp number** → `COMPANY` in `site-data.ts` (currently the live site’s 082 291 6151 / +27 82 291 6151)
 - **Brand colours** → the `--color-brand-*` scale in `globals.css`
 
 ## Deployment

@@ -5,9 +5,12 @@
  * purposes only — they are clearly labelled as such in the UI, and the
  * WhatsApp message always asks for a firm quote. To tune them for the
  * business, edit the numbers in RATE_TABLE only.
+ *
+ * Numbers live here; every display word lives in src/lib/i18n.ts.
  */
 
 import { whatsappUrl } from "@/lib/site-data";
+import { DICT, type Lang } from "@/lib/i18n";
 
 export type ServiceKey =
   | "building"
@@ -19,101 +22,68 @@ export type ServiceKey =
 
 export interface ServiceRate {
   key: ServiceKey;
-  label: string;
-  /** What the "size" input means for this service */
-  sizeLabel: string;
-  sizeUnit: string;
-  /** Singular form for "per …" price lines, e.g. "per room" */
-  unitSingular?: string;
   presets: number[];
   minSize: number;
   /** Indicative range per unit. Omitted => custom quote required. */
   rate?: { low: number; high: number };
-  note: string;
 }
 
 export const RATE_TABLE: ServiceRate[] = [
   {
     key: "building",
-    label: "Building",
-    sizeLabel: "Floor area to build",
-    sizeUnit: "m²",
     presets: [50, 80, 120, 200],
     minSize: 30,
     rate: { low: 8500, high: 13500 },
-    note: "Indicative market range for new residential/commercial building work per m².",
   },
   {
     key: "renovations",
-    label: "Renovations",
-    sizeLabel: "Area being renovated",
-    sizeUnit: "m²",
     presets: [10, 20, 40, 80],
     minSize: 5,
     rate: { low: 5500, high: 9500 },
-    note: "Tiling, painting, remodelling and general renovation work per m².",
   },
   {
     key: "formwork",
-    label: "Formwork",
-    sizeLabel: "Formwork contact area",
-    sizeUnit: "m²",
     presets: [20, 50, 100, 200],
     minSize: 10,
     rate: { low: 250, high: 600 },
-    note: "Supply-and-erect formwork per m² of concrete contact area.",
   },
   {
     key: "plumbing",
-    label: "Plumbing",
-    sizeLabel: "Rooms / major installations",
-    sizeUnit: "rooms",
-    unitSingular: "room",
     presets: [1, 2, 3, 4],
     minSize: 1,
     rate: { low: 6500, high: 15000 },
-    note: "Per bathroom/kitchen installation — repairs and geyser work are usually less.",
   },
   {
     key: "civil",
-    label: "Civil Works",
-    sizeLabel: "Works area",
-    sizeUnit: "m²",
     presets: [100, 250, 500, 1000],
     minSize: 50,
     rate: { low: 250, high: 550 },
-    note: "Civil works scope varies widely — engineer-driven projects are quoted per design.",
   },
   {
     key: "development",
-    label: "Property Developers",
-    sizeLabel: "Units / extent of development",
-    sizeUnit: "units",
-    unitSingular: "unit",
     presets: [1, 4, 8, 12],
     minSize: 1,
-    note: "Developer services are scoped per project — we’ll put a tailored proposal together with you.",
   },
 ];
 
-export const FINISH_OPTIONS = [
-  { value: "standard", label: "Standard finish", multiplier: [1, 1] as const },
-  { value: "premium", label: "Premium finish", multiplier: [1.2, 1.35] as const },
-] as const;
+export type FinishValue = "standard" | "premium";
+export type TimelineValue = "flexible" | "standard" | "urgent";
 
-export const TIMELINE_OPTIONS = [
-  { value: "flexible", label: "Flexible", multiplier: [0.95, 1] as const },
-  { value: "standard", label: "Standard", multiplier: [1, 1] as const },
-  { value: "urgent", label: "Urgent", multiplier: [1.1, 1.2] as const },
-] as const;
+/** Multipliers only — labels come from the active dictionary. */
+export const FINISH_OPTIONS: { value: FinishValue; multiplier: readonly [number, number] }[] =
+  [
+    { value: "standard", multiplier: [1, 1] },
+    { value: "premium", multiplier: [1.2, 1.35] },
+  ];
 
-export const AREA_OPTIONS = [
-  "Ballito — KwaZulu-Natal",
-  "Durban — KwaZulu-Natal",
-  "Kempton Park — Gauteng",
-  "Johannesburg — Gauteng",
-  "Elsewhere in South Africa",
-] as const;
+export const TIMELINE_OPTIONS: {
+  value: TimelineValue;
+  multiplier: readonly [number, number];
+}[] = [
+  { value: "flexible", multiplier: [0.95, 1] },
+  { value: "standard", multiplier: [1, 1] },
+  { value: "urgent", multiplier: [1.1, 1.2] },
+];
 
 export function serviceByKey(key: ServiceKey): ServiceRate {
   return RATE_TABLE.find((s) => s.key === key) ?? RATE_TABLE[0];
@@ -128,8 +98,8 @@ export interface EstimateResult {
 export function estimate(
   service: ServiceKey,
   size: number,
-  finish: (typeof FINISH_OPTIONS)[number]["value"],
-  timeline: (typeof TIMELINE_OPTIONS)[number]["value"],
+  finish: FinishValue,
+  timeline: TimelineValue,
 ): EstimateResult {
   const def = serviceByKey(service);
   if (!def.rate) return { low: 0, high: 0, hasRate: false };
@@ -157,38 +127,42 @@ export function formatRand(n: number): string {
 export interface CalculatorFields {
   service: ServiceKey;
   size: number;
-  finish: string;
-  timeline: string;
+  finish: FinishValue;
+  timeline: TimelineValue;
+  /** Already-translated project area label (from the active dictionary). */
   area: string;
   name: string;
   cell: string;
 }
 
-export function buildEstimateMessage(fields: CalculatorFields): string {
+export function buildEstimateMessage(fields: CalculatorFields, lang: Lang = "en"): string {
+  const dict = DICT[lang];
+  const wt = dict.whatsapp;
+  const sm = dict.servicesMeta[fields.service];
   const def = serviceByKey(fields.service);
   const qty = Math.max(def.minSize, Math.max(0, fields.size || 0));
-  const est = estimate(fields.service, qty, fields.finish as never, fields.timeline as never);
-  const finishLabel = FINISH_OPTIONS.find((o) => o.value === fields.finish)?.label ?? "Standard finish";
-  const timelineLabel = TIMELINE_OPTIONS.find((o) => o.value === fields.timeline)?.label ?? "Standard";
+  const est = estimate(fields.service, qty, fields.finish, fields.timeline);
+  const finishLabel = dict.calc.finish[fields.finish];
+  const timelineLabel = dict.calc.timeline[fields.timeline];
 
   const lines = [
-    "Hi Amozecks Projects! I used the estimate calculator on your website and would like a firm quote:",
+    wt.estimateIntro,
     "",
-    `• Service: ${def.label}`,
-    `• ${def.sizeLabel}: ${qty} ${def.sizeUnit}`,
-    `• Finish: ${finishLabel}`,
-    `• Timeline: ${timelineLabel}`,
-    `• Area: ${fields.area}`,
+    `• ${wt.fieldService}: ${sm.label}`,
+    `• ${sm.sizeLabel}: ${qty} ${sm.sizeUnit}`,
+    `• ${wt.fieldFinish}: ${finishLabel}`,
+    `• ${wt.fieldTimeline}: ${timelineLabel}`,
+    `• ${wt.fieldArea}: ${fields.area}`,
   ];
   if (est.hasRate) {
-    lines.push(`• Indicative estimate: ${formatRand(est.low)} – ${formatRand(est.high)}`);
+    lines.push(`• ${wt.fieldEstimate}: ${formatRand(est.low)} – ${formatRand(est.high)}`);
   }
-  if (fields.name.trim()) lines.push(`• Name: ${fields.name.trim()}`);
-  if (fields.cell.trim()) lines.push(`• Cell: ${fields.cell.trim()}`);
-  lines.push("", "Please contact me to arrange a site assessment. Thank you!");
+  if (fields.name.trim()) lines.push(`• ${wt.fieldName}: ${fields.name.trim()}`);
+  if (fields.cell.trim()) lines.push(`• ${wt.fieldCell}: ${fields.cell.trim()}`);
+  lines.push("", wt.estimateOutro);
   return lines.join("\n");
 }
 
-export function estimateWhatsAppUrl(fields: CalculatorFields): string {
-  return whatsappUrl(buildEstimateMessage(fields));
+export function estimateWhatsAppUrl(fields: CalculatorFields, lang: Lang = "en"): string {
+  return whatsappUrl(buildEstimateMessage(fields, lang));
 }

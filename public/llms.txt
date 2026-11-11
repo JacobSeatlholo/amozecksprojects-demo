@@ -16,6 +16,7 @@
 - [About Us](https://www.amozecksprojects.co.za/): 100% Black-owned contractor; BBBEE-compliant procurement; practical on-site training and local employment.
 - [Projects](https://www.amozecksprojects.co.za/): photographs of building sites, residential work and quality checks.
 - [Instant Estimate](https://www.amozecksprojects.co.za/): indicative quote calculator that hands off to WhatsApp for firm quotes.
+- Languages: the demo site is fully available in English, isiZulu and Afrikaans (EN/ZU/AF switcher in the header); all WhatsApp messages localise to the selected language.
 
 ## Contact
 

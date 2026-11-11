@@ -1,9 +1,15 @@
+"use client";
+
 import Image from "next/image";
 import { Facebook, MessageCircle, MapPin, Clock, Phone, Mail } from "lucide-react";
 import logoWhite from "@/assets/images/logo-white.webp";
 import { COMPANY, NAV_LINKS, whatsappUrl } from "@/lib/site-data";
+import { useT } from "@/lib/lang-store";
+
+const AREA_CHIPS = ["Ballito", "Durban", "Kempton Park", "Johannesburg", "KwaZulu-Natal", "Gauteng"];
 
 export default function SiteFooter() {
+  const { t } = useT();
   const year = new Date().getFullYear();
   return (
     <footer className="mt-auto bg-ink-950 text-zinc-300">
@@ -17,14 +23,14 @@ export default function SiteFooter() {
             height={94}
             className="h-auto w-[180px]"
           />
-          <p className="max-w-sm text-sm leading-relaxed text-zinc-400">{COMPANY.footerBlurb}</p>
-          <ul className="flex items-center gap-3" aria-label="Social media links">
+          <p className="max-w-sm text-sm leading-relaxed text-zinc-400">{t.footer.blurb}</p>
+          <ul className="flex items-center gap-3" aria-label={t.footer.socialLabel}>
             <li>
               <a
                 href={COMPANY.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`${COMPANY.name} on Facebook (opens in a new tab)`}
+                aria-label={`${COMPANY.name} ${t.footer.facebookAria}`}
                 className="flex size-11 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:border-brand-500 hover:text-brand-400"
               >
                 <Facebook className="size-5" aria-hidden />
@@ -32,10 +38,10 @@ export default function SiteFooter() {
             </li>
             <li>
               <a
-                href={whatsappUrl(COMPANY.whatsappGreeting)}
+                href={whatsappUrl(t.whatsapp.greeting)}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`${COMPANY.name} on WhatsApp (opens in a new tab)`}
+                aria-label={`${COMPANY.name} ${t.footer.whatsappAria}`}
                 className="flex size-11 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:border-brand-500 hover:text-brand-400"
               >
                 <MessageCircle className="size-5" aria-hidden />
@@ -45,19 +51,19 @@ export default function SiteFooter() {
         </div>
 
         {/* Quick links */}
-        <nav aria-label="Footer navigation">
-          <h2 className="font-heading text-base font-semibold text-white">Quick Links</h2>
+        <nav aria-label={t.footer.quickLinks}>
+          <h2 className="font-heading text-base font-semibold text-white">{t.footer.quickLinks}</h2>
           <ul className="mt-4 space-y-2.5 text-sm">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <a href={link.href} className="text-zinc-400 transition-colors hover:text-brand-400">
-                  {link.label}
+                  {t.nav[link.key]}
                 </a>
               </li>
             ))}
             <li>
               <a href="#calculator" className="text-zinc-400 transition-colors hover:text-brand-400">
-                Get an Estimate
+                {t.footer.getEstimate}
               </a>
             </li>
           </ul>
@@ -65,7 +71,7 @@ export default function SiteFooter() {
 
         {/* Contact */}
         <div>
-          <h2 className="font-heading text-base font-semibold text-white">Contact</h2>
+          <h2 className="font-heading text-base font-semibold text-white">{t.footer.contact}</h2>
           <ul className="mt-4 space-y-3.5 text-sm text-zinc-400">
             {COMPANY.addresses.map((a) => (
               <li key={a.label} className="flex gap-2.5">
@@ -90,29 +96,25 @@ export default function SiteFooter() {
             </li>
             <li className="flex gap-2.5">
               <Clock className="mt-0.5 size-4 shrink-0 text-brand-400" aria-hidden />
-              <span>{COMPANY.hours}</span>
+              <span>{t.hours}</span>
             </li>
           </ul>
         </div>
 
         {/* Service areas */}
         <div>
-          <h2 className="font-heading text-base font-semibold text-white">Areas We Serve</h2>
-          <ul className="mt-4 flex flex-wrap gap-2" aria-label="Service areas">
-            {["Ballito", "Durban", "Kempton Park", "Johannesburg", "KwaZulu-Natal", "Gauteng"].map(
-              (area) => (
-                <li
-                  key={area}
-                  className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-medium text-zinc-300"
-                >
-                  {area}
-                </li>
-              ),
-            )}
+          <h2 className="font-heading text-base font-semibold text-white">{t.footer.areasWeServe}</h2>
+          <ul className="mt-4 flex flex-wrap gap-2" aria-label={t.footer.areasLabel}>
+            {AREA_CHIPS.map((area) => (
+              <li
+                key={area}
+                className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-medium text-zinc-300"
+              >
+                {area}
+              </li>
+            ))}
           </ul>
-          <p className="mt-5 text-sm text-zinc-400">
-            100% Black Owned &amp; NHBRC Registered — do it right the first time.
-          </p>
+          <p className="mt-5 text-sm text-zinc-400">{t.footer.tagline}</p>
         </div>
       </div>
 
@@ -122,7 +124,7 @@ export default function SiteFooter() {
             {COMPANY.copyright.replace("2021", `2021–${year}`)}
           </p>
           <p>
-            Demo built by{" "}
+            {t.footer.demoCredit}{" "}
             <a
               href="https://businesshustle.co.za"
               target="_blank"

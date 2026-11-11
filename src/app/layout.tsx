@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import SiteHeader from "@/components/site/header";
 import SiteFooter from "@/components/site/footer";
 import FloatingWhatsApp from "@/components/site/floating-whatsapp";
+import LanguageSync from "@/components/site/lang-sync";
 import { COMPANY } from "@/lib/site-data";
 
 /* Self-hosted fonts — replaces the original site's render-blocking
@@ -100,9 +101,8 @@ export default function RootLayout({
           {/* Keep scroll-reveal content visible without JavaScript */}
           <style>{`.reveal{opacity:1 !important;transform:none !important}`}</style>
         </noscript>
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
+        {/* Client component: skip link (localized) + <html lang>/title sync + persisted language rehydration */}
+        <LanguageSync />
         <SiteHeader />
         <main id="main-content" className="flex-1">
           {children}

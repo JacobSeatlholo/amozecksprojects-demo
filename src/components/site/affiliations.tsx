@@ -1,8 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import affNhbrc from "@/assets/images/aff-nhbrc.webp";
 import affSacpcmp from "@/assets/images/aff-sacpcmp.webp";
 import affMbsa from "@/assets/images/aff-mbsa.webp";
 import { AFFILIATIONS } from "@/lib/site-data";
+import { useT } from "@/lib/lang-store";
 import Reveal from "@/components/site/reveal";
 
 const AFF_IMAGES = {
@@ -12,6 +15,7 @@ const AFF_IMAGES = {
 } as const;
 
 export default function Affiliations() {
+  const { t } = useT();
   return (
     <section aria-labelledby="affiliations-title" className="border-y border-border bg-muted py-14">
       <div className="wrap">
@@ -20,7 +24,7 @@ export default function Affiliations() {
             id="affiliations-title"
             className="text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground"
           >
-            Registered &amp; Affiliated With
+            {t.affiliations.heading}
           </h2>
           <ul className="mt-8 grid gap-5 sm:grid-cols-3">
             {AFFILIATIONS.map((a) => (
